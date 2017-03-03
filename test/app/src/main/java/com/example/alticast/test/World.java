@@ -92,7 +92,7 @@ public class World{
 
 		xBackGround = 0;
 		yBackGround = -height;
-		yBackGroundIncrement = 0.15;
+		yBackGroundIncrement = 0.3;
 
 		startingHealth = 100;
 		actualHealth=startingHealth;
@@ -128,7 +128,7 @@ public class World{
 
 		//universal opponent speed is set here
 		///////////////////////////////////////////////////////////////////////////////
-		universalOppoSpeed=1.2;
+		universalOppoSpeed=3;
 		settingsUniversalOppoSpeed = universalOppoSpeed/2;
 		//////////////////////////////////////////////////////////////////////////////
 
@@ -246,6 +246,7 @@ public class World{
 		//decreases the missilesTimer and once it reaches zero, the next missile can be fired
 		else if (missilesTimer > 0)
 			missilesTimer--;
+
 	}
 
 	/*
@@ -629,26 +630,16 @@ public class World{
 	/*
 	 * Updates the showHealthBar picture
 	 */
-/*	public void updateHealth() {
+	public double updateHealth() {
 		// TODO Auto-generated method stub
 		//"showHealth" is decreased by 1 each time, until it equals "actualHealth"
 		if (shownHealth != actualHealth)
 			shownHealth--;
 
-		healthPicWidth = shownHealth/startingHealth; //determines the width used by SubImage to get part of the entire health bar picture 
-
-		//try and catch statement, if the width used in "getSubImage" is zero
-		try {
-			//gets part of the entire health bar picture
-			shownHealthBar = actualHealthBar.getSubimage(0, 0, (int) (healthPicWidth * actualHealthBar.getWidth()), actualHealthBar.getHeight());
-		} catch (Exception RasterFormatException) {
-			// TODO: handle exception
-			//the width used in "getSubImage" is change to 1, so no error occures
-			shownHealthBar = actualHealthBar.getSubimage(0, 0, 1, actualHealthBar.getHeight());
-		}
+		return healthPicWidth = shownHealth/startingHealth; //determines the width used by SubImage to get part of the entire health bar picture
 
 	}
-*/
+
 	/*
 	 * Returns the "shownHealthBar" picture
 	 */

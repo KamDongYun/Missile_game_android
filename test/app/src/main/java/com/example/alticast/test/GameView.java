@@ -5,6 +5,7 @@ package com.example.alticast.test;
         import android.graphics.BitmapFactory;
         import android.graphics.Canvas;
         import android.graphics.Color;
+        import android.graphics.Matrix;
         import android.graphics.Paint;
         import android.graphics.Rect;
         import android.graphics.RectF;
@@ -25,17 +26,26 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
     private GameThread mThread;
 
     private int Width, Height;
+    private double HealthCons=1;
     private Paint redPaint;
     private Paint bluePaint;
+    private Paint GrayPaint;
+    private Paint BlackPaint;
+    private Paint GreenPaint;
     private World planet;
+    private String Score;
+
 
     //img variable in game
     private Bitmap explosionImg;
     private Bitmap[] explosionSplit;
     private Bitmap backGroundImg;
-    private Bitmap missileDishImg;
+    private Bitmap missileDishImgR;
     private Bitmap planetSurface;
     private int planetSurfaceSize = 280;
+    private Bitmap healthBar;
+    private Bitmap missile;
+    private Bitmap missileDishImgL;
     //img variable in menu
 
 
@@ -51,23 +61,37 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
         Display display = ((WindowManager) context.getSystemService(context.WINDOW_SERVICE)).getDefaultDisplay();
         Width = display.getWidth();
         Height = display.getHeight();
+        Score ="Score: ";
 
         planet = new World(Width, Height);
 
+        GreenPaint = new Paint();
         redPaint = new Paint();
         bluePaint = new Paint();
+        GrayPaint = new Paint();
+        BlackPaint = new Paint();
+        BlackPaint.setColor(Color.BLACK);
+        GrayPaint.setColor(Color.DKGRAY);
         redPaint.setColor(Color.RED);
         bluePaint.setColor(Color.BLUE);
+        GreenPaint.setColor(Color.GREEN);
         redPaint.setStrokeWidth(20);
         bluePaint.setStrokeWidth(20);
-
+        GrayPaint.setStrokeWidth(80);
+        BlackPaint.setStrokeWidth(80);
+        GreenPaint.setTextSize(100);
 
 
         //img load
-        missileDishImg = BitmapFactory.decodeResource(context.getResources(), R.drawable.missile_dish);
+        missileDishImgR = BitmapFactory.decodeResource(context.getResources(), R.drawable.missile_dish);
         backGroundImg = BitmapFactory.decodeResource(context.getResources(), R.drawable.nightsky);
         explosionImg = BitmapFactory.decodeResource(context.getResources(), R.drawable.explosion_sprite);
         planetSurface = BitmapFactory.decodeResource(context.getResources(), R.drawable.planet_surface101);
+        healthBar = BitmapFactory.decodeResource(context.getResources(),R.drawable.health_bar);
+        missile = BitmapFactory.decodeResource(context.getResources(),R.drawable.missilesammo101);
+
+
+
 
         explosionSplit = new Bitmap[12];
 
@@ -90,6 +114,16 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
         }
 
         planetSurface = Bitmap.createScaledBitmap(planetSurface, Width, 280, true);
+        healthBar = Bitmap.createScaledBitmap(healthBar,Width,80,true);
+        missile = Bitmap.createScaledBitmap(missile,Width/30,80,true);
+        missileDishImgR = Bitmap.createScaledBitmap(missileDishImgR,150,150,true);
+
+
+        Matrix sideInversion = new Matrix();
+        sideInversion.setScale(-1, 1);
+        missileDishImgL = Bitmap.createBitmap(missileDishImgR, 0, 0,
+                missileDishImgR.getWidth(), missileDishImgR.getHeight(), sideInversion, false);
+
         mThread = new GameThread(context, holder);
     }
 
@@ -229,14 +263,17 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
                 planet.reset(planet.getLevel());
             }
             //calls the "updateHealth" method from the planet class
-            //      planet.updateHealth();
+            HealthCons=planet.updateHealth();
             //calls the "collisions" method from the planet class
             planet.collisions();
+            planet.updateScore();
+
+            Score = "Score: " + planet.getShownScore();
 
         }
         ////////////////////////////////////////////////////////////////////////////
     }
-    private void setAllFalse(){//method that sets all of the booleans in the game to false, so as to avoid boolean confusion
+    private void setAllFalse(){//method that sets all of the booleans inhttps://github.com/KamDongYun/Missile_game_android.git the game to false, so as to avoid boolean confusion
 
     }
 
@@ -249,7 +286,7 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
         {
             Line_Missiles tempMissile = planet.getMissiles().get(i);
 
-            canvas.drawLine(Width/2,Height,(int)tempMissile.getXCurrent(),(int)tempMissile.getYCurrent(),bluePaint);
+            canvas.drawLine(Width/2,Height-planetSurfaceSize,(int)tempMissile.getXCurrent(),(int)tempMissile.getYCurrent(),bluePaint);
         }
 
 
@@ -270,11 +307,34 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
 
             }
         }
-        for(int x=0;x<planet.getOppo().size();x++){//for loop runs through the line opponents vector and draws every line in the vector
-            Line_Opponents temp =  (Line_Opponents) planet.getOppo().get(x);
-            canvas.drawLine((int) temp.getStartXCoor (), (int) temp.getStartYCoor (), (int) temp.getXCoor (), (int) temp.getYCoor (),redPaint);
+        for(int x=0;x<planet.getOppo().size();x++) {//for loop runs through the line opponents vector and draws every line in the vector
+            Line_Opponents temp = (Line_Opponents) planet.getOppo().get(x);
+            canvas.drawLine((int) temp.getStartXCoor(), (int) temp.getStartYCoor(), (int) temp.getXCoor(), (int) temp.getYCoor(), redPaint);
 
         }
+
+
+
+        canvas.drawBitmap(healthBar,0,Height-healthBar.getHeight(),null);
+        canvas.drawLine(Width,Height-healthBar.getHeight()/2,(int)(healthBar.getWidth()*HealthCons),Height-healthBar.getHeight()/2,GrayPaint);
+        canvas.drawLine(0,Height-healthBar.getHeight()-40,Width,Height-healthBar.getHeight()-40,BlackPaint);
+
+
+
+
+        for(int i=0; i<planet.getCurrNumOfMissiles();i++)
+        {
+            canvas.drawBitmap(missile,i*missile.getWidth(),Height-healthBar.getHeight()-80,null);
+        }
+
+
+
+
+        canvas.drawBitmap(missileDishImgR,Width/2 ,Height-healthBar.getHeight()-80-missileDishImgR.getHeight(),null);
+        canvas.drawBitmap(missileDishImgL,Width/2 -missileDishImgL.getWidth(),Height-healthBar.getHeight()-80-missileDishImgL.getHeight(),null);
+
+        canvas.drawText(Score,0,100,GreenPaint);
+
         return canvas;
     }
 }
